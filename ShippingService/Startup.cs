@@ -12,9 +12,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using ProductService.Data;
+using ShippingService.Data;
 
-namespace ProductService
+namespace ShippingService
 {
     public class Startup
     {
@@ -32,7 +32,7 @@ namespace ProductService
             services.AddDbContext<AppDbContext>(options =>
                 options.UseInMemoryDatabase("InMem"));
 
-            services.AddScoped<IProductRepo, ProductRepo>();
+            services.AddScoped<IShippingRepo, ShippingRepo>();
 
             services.AddControllers();
 
@@ -40,7 +40,7 @@ namespace ProductService
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProductService", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ShippingService", Version = "v1" });
             });
         }
 
@@ -51,7 +51,7 @@ namespace ProductService
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ProductService v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ShippingService v1"));
             }
 
             app.UseHttpsRedirection();
@@ -64,7 +64,7 @@ namespace ProductService
             {
                 endpoints.MapControllers();
             });
-
+            
             PrepDb.PrepData(app);
         }
     }
