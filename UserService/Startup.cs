@@ -14,8 +14,10 @@ namespace UserService
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IWebHostEnvironment env;
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
+            this.env = env;
             Configuration = configuration;
         }
 
@@ -24,9 +26,20 @@ namespace UserService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            if (env.IsProduction())
+            {
+                Console.WriteLine("--> Using SqlServer Db");
+                services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("UsersConn")));
+            }
+            else
+            {
+                Console.WriteLine("--> Using InMem Db");
+                Console.WriteLine("--> Using SqlServer Db");
+                services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("UsersConn")));
+            }
 
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseInMemoryDatabase("InMem"));
 
             services.AddScoped<IUserRepo, UserRepo > ();
 
@@ -51,7 +64,7 @@ namespace UserService
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserService v1"));
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 
@@ -62,7 +75,7 @@ namespace UserService
                 endpoints.MapControllers();
             });
 
-            PrepDb.PrepData(app);
+            PrepDb.PrepData(app, env.IsProduction());
         }
     }
 }

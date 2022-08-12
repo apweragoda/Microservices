@@ -17,5 +17,19 @@ spec:
           image: crusher1224/productservice:latest
           resources:
             limits:
-              memory: '128Mi'
-              cpu: '500m'
+              memory: '512Mi'
+              cpu: '1000m'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: products-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: productservice
+  ports:
+    - name: productservice
+      protocol: TCP
+      port: 80
+      targetPort: 80

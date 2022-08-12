@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProductService.Data;
 using ProductService.Dtos;
 using ProductService.Models;
+using ProductService.SyncDataServices.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +18,13 @@ namespace ProductService.Controllers
     {
         private readonly IProductRepo repository;
         private readonly IMapper mapper;
+        private readonly IUserDataClient userDataClient;
 
-        public ProductController(IProductRepo repository, IMapper mapper)
+        public ProductController(IProductRepo repository, IMapper mapper, IUserDataClient userDataClient)
         {
             this.repository = repository;
             this.mapper = mapper;
+            this.userDataClient = userDataClient;
         }
 
 
@@ -67,7 +70,7 @@ namespace ProductService.Controllers
 
 
         [HttpPost]
-        public ActionResult<ProductReadDto> CreateProduct(ProductCreateDto productCreateDto)
+        public async Task<ActionResult<ProductReadDto>> CreateProduct(ProductCreateDto productCreateDto)
         {
             var productModel = mapper.Map<Product>(productCreateDto);
             repository.CreateProduct(productModel);
@@ -75,6 +78,15 @@ namespace ProductService.Controllers
             Console.WriteLine("--> Creating Product...");
 
             var productItem = mapper.Map<ProductReadDto>(productModel);
+
+            try
+            {
+                await userDataClient.SendProductsToUser(productItem);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Could not send synchronously: {ex.Message}");
+            }
 
             return CreatedAtRoute(nameof(GetProductById), new { productItem.Id }, productItem);
         }

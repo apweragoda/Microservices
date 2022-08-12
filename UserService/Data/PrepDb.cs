@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -10,14 +11,28 @@ namespace UserService.Data
 {
     public static class PrepDb
     {
-        public static void PrepData(IApplicationBuilder app)
+        public static void PrepData(IApplicationBuilder app, bool isProd)
         {
             using var serviceScope = app.ApplicationServices.CreateScope();
-            SeedData(serviceScope.ServiceProvider.GetService<AppDbContext>());
+            SeedData(serviceScope.ServiceProvider.GetService<AppDbContext>(), isProd);
         }
 
-        private static void SeedData(AppDbContext context)
+        private static void SeedData(AppDbContext context, bool isProd)
         {
+            if (isProd)
+            {
+                Console.WriteLine("--> Attemting to apply migrations...");
+                try
+                {
+                    Console.WriteLine("--> Applying migrations...");
+                    context.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"--> Could not run migrations: {ex.Message}");
+                }
+            }
+
             if(!context.Users.Any())
             {
                 Console.WriteLine("--> Seeding Data...");

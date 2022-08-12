@@ -55,8 +55,15 @@ namespace UserService.Controllers
             Console.WriteLine("--> Creating User...");
 
             var userModel = mapper.Map<User>(userCreateDto);
-            repository.CreateUser(userModel);
-            repository.SaveChanges();
+            try
+            {
+                repository.CreateUser(userModel);
+                repository.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Could not send synchronously: {ex.Message}");
+            }            
 
             var userItem = mapper.Map<UserReadDto>(userModel);
 

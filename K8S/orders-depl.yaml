@@ -1,36 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: users-depl
+  name: orders-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: userservice
+      app: orderservice
   template:
     metadata:
       labels:
-        app: userservice
+        app: orderservice
     spec:
       containers:
-        - name: userservice
-          image: crusher1224/userservice:latest
+        - name: orderservice
+          image: crusher1224/orderservice:latest
           resources:
             limits:
-              memory: '512Mi'
-              cpu: '1000m'
-
+              memory: '128Mi'
+              cpu: '500m'
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: users-clusterip-srv
+  name: orders-clusterip-srv
 spec:
   type: ClusterIP
   selector:
-    app: userservice
+    app: orderservice
   ports:
-    - name: userservice
+    - name: orderservice
       protocol: TCP
       port: 80
       targetPort: 80
